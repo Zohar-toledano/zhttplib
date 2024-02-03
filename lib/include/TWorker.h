@@ -36,7 +36,7 @@ namespace ZServer
 		}
 	};
 
-	class Worker
+	class TWorker
 	{
 		SharedQueue<SocketTCP> *queue;
 		HTTPServerProps *serverProps;
@@ -44,13 +44,13 @@ namespace ZServer
 		bool *runing;
 
 	public:
-		Worker(SharedQueue<SocketTCP> *queue, HTTPServerProps *sp, bool *runing) : queue(queue), serverProps(sp), runing(runing)
+		TWorker(SharedQueue<SocketTCP> *queue, HTTPServerProps *sp, bool *runing) : queue(queue), serverProps(sp), runing(runing)
 		{
 		}
 		void start()
 		{
 			// create thread of mainLoop and store it in thread member variable.
-			thread = std::thread(&Worker::mainLoop, this);
+			thread = std::thread(&TWorker::mainLoop, this);
 		}
 		virtual void mainLoop()
 		{
@@ -142,22 +142,22 @@ namespace ZServer
 		}
 	};
 
-	class WorkersPool
+	class TWorkersPool
 	{
 		bool runing;
 		int threads;
 		SharedQueue<SocketTCP> queue;
 		HTTPServerProps *serverProps;
-		std::vector<Worker *> workers;
+		std::vector<TWorker *> workers;
 
 	public:
-		WorkersPool(HTTPServerProps *sp, int workersNum) : serverProps(sp)
+		TWorkersPool(HTTPServerProps *sp, int workersNum) : serverProps(sp)
 		{
 			createWorkers(workersNum);
 		};
-		WorkersPool(){};
+		TWorkersPool(){};
 
-		~WorkersPool() { destroyWorkers(); };
+		~TWorkersPool() { destroyWorkers(); };
 
 		void createWorkers(int threads)
 		{
@@ -166,7 +166,7 @@ namespace ZServer
 
 				for (int i = 0; i < threads; i++)
 				{
-					auto worker = new Worker(&queue, serverProps, &runing);
+					auto worker = new TWorker(&queue, serverProps, &runing);
 					workers.push_back(worker);
 				}
 			}

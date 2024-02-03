@@ -10,12 +10,11 @@
 #include "./HTTPReqRes.h"
 #include "./HTTPServerProps.h"
 #include "./Routemap.h"
-#include "./Worker.h"
+// #include "./TWorker.h"
 #include "./Utils.h"
 
 #include "./Socket.h"
-// #include "Workers.hpp"
-
+#include "WorkersPool.hpp"
 namespace ZServer
 {
 	using json = nlohmann::json;
@@ -82,9 +81,14 @@ namespace ZServer
 		WorkersPool *pool;
 
 	public:
-		HTTPServer(int port, int childNum = 2) : Server(port)
+		HTTPServer(
+			int port,
+			std::string sharedMemoryName,
+			std::string targetExecutable,
+			int childNum = 2
+			) : Server(port)
 		{
-			this->pool = new WorkersPool(&props, childNum);
+			this->pool = new WorkersPool(targetExecutable,childNum, sharedMemoryName);
 			props.logger = DefaultLogger;
 			props.HandleNotfound = DefaultHandleNotfound;
 			props.HandleServerError = DefaultHandleServerError;
@@ -106,7 +110,7 @@ namespace ZServer
 
 		virtual void run() override
 		{
-			pool->start();
+			pool->createWorkers();
 			Server::run();
 		}
 
