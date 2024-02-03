@@ -3,7 +3,9 @@
 #include <string>
 #include <sstream>
 
-#include "osResources.hpp"
+#include "osResources/Pipe.hpp"
+#include "osResources/Process.hpp"
+
 struct WorkerBase
 {
 public:

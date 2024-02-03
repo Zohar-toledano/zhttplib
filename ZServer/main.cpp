@@ -2,11 +2,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "argparse.hpp"
 
-#include "Server.h"
+#include <server/Server.h>
 using namespace ZServer;
 
-#include "argparse.hpp"
+#include <multiproccesing/WorkerRoutine.hpp>
 
 struct MasterArgs : public argparse::Args
 {
@@ -17,9 +18,10 @@ struct MasterArgs : public argparse::Args
     {
         std::cout << "Runs as a master." << std::endl;
     }
-    int run() override
+    int run(std::string path)
     {
-        HTTPServer server(8080, 1);
+        std::cout<<path;
+        HTTPServer server(8080,memory,path,1);
 
         server.at(
             R"(/products/<id:\d+>/test)",
@@ -65,8 +67,9 @@ struct WorkerArgs : public argparse::Args
     }
     int run() override
     {
-        // WorkerRoutine w(id, memoryName);
-        // w.workerMain();
+        std::cout<<"running"<<std::endl;
+        WorkerRoutine w(id, memory);
+        w.workerMain();
         return 0;
     }
 };
@@ -87,8 +90,16 @@ int main(int argc, char *argv[])
 
     if (args.verbose)
         args.print(); // prints all variables
-    args.run_subcommands();
 
+    if (args.master.is_valid)
+    {
+        args.master.run(args.path);
+    }
+    else if (args.slave.is_valid)
+    {
+        args.slave.run();
+    }
+    
     return 0;
 }
 

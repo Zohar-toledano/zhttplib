@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 project(
     ZServer
@@ -10,7 +10,7 @@ include_directories(json)
 
 # Add the server library as a subdirectory
 add_subdirectory(lib)
-add_subdirectory(multiproccesing)
+# add_subdirectory(multiproccesing)
 
 
 # Add the subbinary as a subdirectory

@@ -21,11 +21,11 @@ namespace ZServer
 {
 	class SocketTCP
 	{
-		int sockfd;
 		sockaddr_in address;
 		static bool initalized;
 
 	public:
+		int sockfd;
 		SocketTCP(int sock, sockaddr_in addr) : sockfd(sock), address(addr)
 		{
 		}

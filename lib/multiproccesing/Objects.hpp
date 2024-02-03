@@ -1,4 +1,6 @@
 #pragma once
+
+#include <osResources/Socket.h>
 #define shared_mem_size 800
 #define sharedQueueType ZServer::SocketTCP
 

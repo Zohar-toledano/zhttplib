@@ -6,8 +6,8 @@
 #include <sstream>
 #include <algorithm>
 
-#include "Exceptions.h"
-#include "Socket.h"
+#include <Exceptions.h>
+#include <osResources\Socket.h>
 
 #define DEFAULT_PROTOCOL "HTTP/1.1"
 #define DEFAULT_STATUS 200

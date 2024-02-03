@@ -1,6 +1,8 @@
 #pragma once
-#include "Socket.h"
-#include "./HTTPReqRes.h"
+
+#include <osResources/Socket.h>
+
+#include <http/HTTPReqRes.h>
 #include <regex>
 namespace ZServer
 {

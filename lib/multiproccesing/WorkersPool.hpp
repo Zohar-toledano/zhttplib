@@ -3,9 +3,9 @@
 #include <thread>
 
 #include "WorkersBase.hpp"
-#include "SharedObject.hpp"
+#include <osResources/SharedObject.hpp>
 #include "Objects.hpp"
-#include "Socket.h"
+#include <osResources/Socket.h>
 
 class WorkerManager : public WorkerBase
 {
@@ -56,25 +56,45 @@ public:
 		while (true)
 		{
 			ZeroMemory(buf, sizeof(buf));
+			std::cout << "llll\n";
+
 			if (pipe.read(buf, sizeof(buf)) > 0)
 			{
+				std::cout << "master got message from slave\n";
 				MasterSlaveMessage msg;
 				memcpy(&msg, buf, sizeof(msg));
 				handleIncomingMessage(msg);
 				memcpy(buf, &msg, sizeof(msg));
 				pipe.write(buf, sizeof(msg));
+				msg.socketID.close();
 			}
 			else
+			{
+				std::cout << "exiting\n";
+
 				break;
+			}
 		}
 	}
 
 	void handleIncomingMessage(MasterSlaveMessage &msg)
 	{
-		// move socket to worker process position
-		// std::cout << "message from " << id << " (pid:" << p.pi.dwProcessId << ")"
-		// 		  << ": sockID: " << msg.socketID << std::endl;
-		// msg.socketID *= 10;
+		// std::cout << "master got message from slave\n";
+		// WSAPROTOCOL_INFO info;
+		// int size = sizeof(info);
+		// if (getsockopt(msg.socketID.sockfd, SOL_SOCKET, SO_PROTOCOL_INFO, (char *)&info, &size) != 0)
+		// {
+		// 	// Handle error
+		// 	std::cout<<"error transfering ownership"<<std::endl;
+		// }
+
+		// SOCKET duplicateSocket = WSADuplicateSocketW(msg.socketID.sockfd, this->p.pi.dwProcessId,&info);
+		// if (duplicateSocket == INVALID_SOCKET)
+		// {
+		// 	// Handle error
+		// 	std::cout<<"error transfering ownership2"<<std::endl;
+
+		// }
 	}
 };
 

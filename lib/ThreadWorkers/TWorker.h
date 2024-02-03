@@ -4,15 +4,15 @@
 #include <thread>
 #include <vector>
 
-#include "Routemap.h"
-#include "HTTPServerProps.h"
+#include <server/Routemap.h>
+#include <server/HTTPServerProps.h>
 #define WORKER_SLEEP_TIME 10
 
 namespace ZServer
 {
 
 	template <typename T>
-	struct SharedQueue
+	struct TSharedQueue
 	{
 		std::mutex mutex;
 		std::queue<T> queue;
@@ -38,13 +38,13 @@ namespace ZServer
 
 	class TWorker
 	{
-		SharedQueue<SocketTCP> *queue;
+		TSharedQueue<SocketTCP> *queue;
 		HTTPServerProps *serverProps;
 		std::thread thread;
 		bool *runing;
 
 	public:
-		TWorker(SharedQueue<SocketTCP> *queue, HTTPServerProps *sp, bool *runing) : queue(queue), serverProps(sp), runing(runing)
+		TWorker(TSharedQueue<SocketTCP> *queue, HTTPServerProps *sp, bool *runing) : queue(queue), serverProps(sp), runing(runing)
 		{
 		}
 		void start()
@@ -146,7 +146,7 @@ namespace ZServer
 	{
 		bool runing;
 		int threads;
-		SharedQueue<SocketTCP> queue;
+		TSharedQueue<SocketTCP> queue;
 		HTTPServerProps *serverProps;
 		std::vector<TWorker *> workers;
 
@@ -166,7 +166,7 @@ namespace ZServer
 
 				for (int i = 0; i < threads; i++)
 				{
-					auto worker = new TWorker(&queue, serverProps, &runing);
+					TWorker* worker = new TWorker(&queue, serverProps, &runing);
 					workers.push_back(worker);
 				}
 			}

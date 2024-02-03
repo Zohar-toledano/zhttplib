@@ -7,14 +7,14 @@
 
 #include <json.hpp>
 #include "./Exceptions.h"
-#include "./HTTPReqRes.h"
+#include "http/HTTPReqRes.h"
 #include "./HTTPServerProps.h"
 #include "./Routemap.h"
-// #include "./TWorker.h"
+#include <ThreadWorkers/TWorker.h>
 #include "./Utils.h"
 
-#include "./Socket.h"
-#include "WorkersPool.hpp"
+#include "osResources/Socket.h"
+#include "multiproccesing/WorkersPool.hpp"
 namespace ZServer
 {
 	using json = nlohmann::json;
@@ -78,7 +78,9 @@ namespace ZServer
 	{
 	private:
 		HTTPServerProps props;
-		WorkersPool *pool;
+		TWorkersPool *pool;
+
+		// WorkersPool *pool;
 
 	public:
 		HTTPServer(
@@ -88,7 +90,8 @@ namespace ZServer
 			int childNum = 2
 			) : Server(port)
 		{
-			this->pool = new WorkersPool(targetExecutable,childNum, sharedMemoryName);
+			// this->pool = new WorkersPool(targetExecutable,childNum, sharedMemoryName);
+			this->pool = new TWorkersPool(&props, childNum);
 			props.logger = DefaultLogger;
 			props.HandleNotfound = DefaultHandleNotfound;
 			props.HandleServerError = DefaultHandleServerError;
@@ -110,7 +113,8 @@ namespace ZServer
 
 		virtual void run() override
 		{
-			pool->createWorkers();
+			// pool->createWorkers();
+			pool->start();
 			Server::run();
 		}
 

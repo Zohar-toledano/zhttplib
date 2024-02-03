@@ -1,7 +1,7 @@
 #pragma once
 
 #include "WorkersBase.hpp"
-#include "SharedObject.hpp"
+#include <osResources/SharedObject.hpp>
 #include "Objects.hpp"
 
 class WorkerRoutine : public WorkerBase
@@ -18,14 +18,15 @@ public:
 		delete so;
 	}
 
-	void requestOwnershipOverSocket(sharedQueueType socketID)
+	void requestOwnershipOverSocket(sharedQueueType * socketID)
 	{
 		char buf[PIPE_BUFSIZE];
-		MasterSlaveMessage msg(socketID);
+		MasterSlaveMessage msg(*socketID);
 		memcpy(buf, &msg, sizeof(msg));
-		pipe.write(buf, PIPE_BUFSIZE);
+		std::cout<<"slave: " << id << " send message to master with code: "<<pipe.write(buf, PIPE_BUFSIZE)<<std::endl;
 		pipe.read(buf, PIPE_BUFSIZE);
 		memcpy(&msg, buf, sizeof(msg));
+		// WSASocket(msg.socketID.family, msg.socketID.type, msg.socketID.protocol, NULL, 0, WSA_FLAG_OVERLAPPED);
 	}
 	void workerMain()
 	{
@@ -37,7 +38,7 @@ public:
 		{
 			if (so->pop(socket))
 			{
-				requestOwnershipOverSocket(socket);
+				requestOwnershipOverSocket(&socket);
 				handleSocket(socket);
 				// break;
 			}
@@ -47,6 +48,7 @@ public:
 	void handleSocket(sharedQueueType socket)
 	{
 		std::cout << "slave: " << id << " got socket: " << std::endl;
+		socket.close();
 	}
 };
 
