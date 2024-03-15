@@ -2,7 +2,7 @@
 
 #include <osResources/Socket.h>
 #define shared_mem_size 800
-#define sharedQueueType ZServer::SocketTCP
+#define sharedQueueType int//ZServer::SocketTCP
 
 struct MasterSlaveMessage
 {

@@ -15,3 +15,12 @@ add_subdirectory(lib)
 
 # Add the subbinary as a subdirectory
 add_subdirectory(ZServer)
+
+add_executable(
+    main
+    main.cpp
+    )
+target_link_libraries(
+    main
+    application1
+)

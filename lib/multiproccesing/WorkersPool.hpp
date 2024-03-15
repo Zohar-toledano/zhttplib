@@ -1,11 +1,11 @@
 #pragma once
 
 #include <thread>
-
 #include "WorkersBase.hpp"
 #include <osResources/SharedObject.hpp>
 #include "Objects.hpp"
 #include <osResources/Socket.h>
+using namespace ZServer;
 
 class WorkerManager : public WorkerBase
 {
@@ -24,6 +24,10 @@ public:
 		std::string sharedMemoryName,
 		SharedObject<sharedQueueType, SomeStruct> *so) : WorkerBase(id)
 	{
+		pipe.create(getPipeName(id));
+		pipeThread = std::thread(&WorkerManager::PipeHandler, this);
+		so = so;
+
 		std::stringstream ss;
 		ss << executable
 		   << " "
@@ -36,9 +40,6 @@ public:
 		   << "-m"
 		   << " "
 		   << sharedMemoryName;
-		pipe.create(getPipeName(id));
-		pipeThread = std::thread(&WorkerManager::PipeHandler, this);
-		so = so;
 		p = Process(ss.str());
 	}
 
@@ -56,17 +57,15 @@ public:
 		while (true)
 		{
 			ZeroMemory(buf, sizeof(buf));
-			std::cout << "llll\n";
 
 			if (pipe.read(buf, sizeof(buf)) > 0)
 			{
-				std::cout << "master got message from slave\n";
 				MasterSlaveMessage msg;
 				memcpy(&msg, buf, sizeof(msg));
-				handleIncomingMessage(msg);
-				memcpy(buf, &msg, sizeof(msg));
-				pipe.write(buf, sizeof(msg));
-				msg.socketID.close();
+				SocketTCP socket(msg.socketID);
+				WSAPROTOCOL_INFOW wsaProtocolInfo = socket.transfer(this->p.pi.dwProcessId);
+				memcpy(buf, &wsaProtocolInfo, sizeof(wsaProtocolInfo));
+				pipe.write(buf, BUFFERSIZE);
 			}
 			else
 			{
@@ -75,26 +74,6 @@ public:
 				break;
 			}
 		}
-	}
-
-	void handleIncomingMessage(MasterSlaveMessage &msg)
-	{
-		// std::cout << "master got message from slave\n";
-		// WSAPROTOCOL_INFO info;
-		// int size = sizeof(info);
-		// if (getsockopt(msg.socketID.sockfd, SOL_SOCKET, SO_PROTOCOL_INFO, (char *)&info, &size) != 0)
-		// {
-		// 	// Handle error
-		// 	std::cout<<"error transfering ownership"<<std::endl;
-		// }
-
-		// SOCKET duplicateSocket = WSADuplicateSocketW(msg.socketID.sockfd, this->p.pi.dwProcessId,&info);
-		// if (duplicateSocket == INVALID_SOCKET)
-		// {
-		// 	// Handle error
-		// 	std::cout<<"error transfering ownership2"<<std::endl;
-
-		// }
 	}
 };
 

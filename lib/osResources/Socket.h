@@ -7,6 +7,8 @@
 #include <windows.h>
 
 #include <string>
+#include <sstream>
+#include "Exceptions.h"
 #include <iostream>
 #ifdef _WIN32
 /* Windows-specific headers */
@@ -29,6 +31,43 @@ namespace ZServer
 		SocketTCP(int sock, sockaddr_in addr) : sockfd(sock), address(addr)
 		{
 		}
+		SocketTCP(int sock) : sockfd(sock)
+		{
+		}
+#ifdef _WIN32
+		SocketTCP(WSAPROTOCOL_INFOW wsaProtocolInfo)
+		{
+			int duplicatedSocket = WSASocketW(
+				FROM_PROTOCOL_INFO,
+				FROM_PROTOCOL_INFO,
+				FROM_PROTOCOL_INFO,
+				&wsaProtocolInfo,
+				0, 0);
+			if (duplicatedSocket == INVALID_SOCKET)
+			{
+				int errorCode = WSAGetLastError();
+				std::stringstream ss;
+
+				ss << "WSASocketW failed with error: " << errorCode << std::endl;
+				throw SocketError(ss.str());
+			}
+			else
+			{
+				sockfd = duplicatedSocket;
+			}
+		}
+
+		WSAPROTOCOL_INFOW transfer(int pid)
+		{
+			WSAPROTOCOL_INFOW wsaProtocolInfo;
+			int duplicateSocket = WSADuplicateSocketW(sockfd, pid, &wsaProtocolInfo);
+			if (duplicateSocket == SOCKET_ERROR)
+			{
+				throw SocketError("Cannot transfer socket\n");
+			}
+			return wsaProtocolInfo;
+		}
+#endif // _WIN32
 		SocketTCP()
 		{
 			init();
@@ -94,20 +133,20 @@ namespace ZServer
 
 		bool connect(const std::string &ip, int port)
 		{
-// 			struct sockaddr_in server_address;
-// 			memset(&server_address, 0, sizeof(server_address));
-// 			server_address.sin_family = AF_INET;
-// 			server_address.sin_port = htons(port);
-// 			address = server_address;
+			// 			struct sockaddr_in server_address;
+			// 			memset(&server_address, 0, sizeof(server_address));
+			// 			server_address.sin_family = AF_INET;
+			// 			server_address.sin_port = htons(port);
+			// 			address = server_address;
 
-// #ifdef _WIN32
-// 			server_address.sin_addr.S_un.S_addr = inet_addr(ip.c_str());
-// #else
-// 			server_address.sin_addr.s_addr = inet_addr(ip.c_str());
-// #endif
+			// #ifdef _WIN32
+			// 			server_address.sin_addr.S_un.S_addr = inet_addr(ip.c_str());
+			// #else
+			// 			server_address.sin_addr.s_addr = inet_addr(ip.c_str());
+			// #endif
 
-// 			return ::connect(sockfd, (struct sockaddr *)&server_address, sizeof(server_address)) >= 0;
-		return true;
+			// 			return ::connect(sockfd, (struct sockaddr *)&server_address, sizeof(server_address)) >= 0;
+			return true;
 		}
 		static void init()
 		{
