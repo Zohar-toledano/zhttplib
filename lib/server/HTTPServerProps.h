@@ -20,8 +20,5 @@ namespace ZServer {
 		RouteHandler HandleNotfound;
 		RouteHandler HandleServerError;
 
-
-
-
 	};
 }

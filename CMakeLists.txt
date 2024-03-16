@@ -8,6 +8,7 @@ project(
 set (CMAKE_CXX_STANDARD 23)
 include_directories(json)
 
+
 # Add the server library as a subdirectory
 add_subdirectory(lib)
 # add_subdirectory(multiproccesing)
@@ -24,3 +25,12 @@ target_link_libraries(
     main
     application1
 )
+
+add_library(
+    user_code SHARED
+    userMain.cpp
+    )
+target_link_libraries(
+        user_code
+        application1
+    )

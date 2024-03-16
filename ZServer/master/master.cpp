@@ -1,6 +1,7 @@
 #include "master.h"
 #include <server/Server.h>
 using namespace ZServer;
+
 #include <iostream>
 #include <fstream>
 #include <cstdio>
@@ -8,7 +9,8 @@ using namespace ZServer;
 #include <map>
 #include <filesystem>
 #include <cmrc/cmrc.hpp>
-#include "multiproccesing/WorkersPool.hpp"
+#include "WorkersPool.hpp"
+#include <random>
 
 CMRC_DECLARE(app1);
 #define EMBEDDED_EXE_FILE "embeded.exe"
@@ -49,11 +51,14 @@ std::string extractExe()
 }
 void startMaster()
 {
-   auto filePath = extractExe();
+   // auto filePath = extractExe();
+   std::string filePath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\ZServer\\Debug\\embeded.exe";
+   std::string dllPath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\Debug\\user_code.dll";
 
-   int slaves = 1;
-   std::string memName = "mem";
-   WorkersPool p(filePath, slaves, memName);
+
+   int slaves = 2;
+   std::string memName = "memoooo";
+   WorkersPool p(filePath, slaves, memName,dllPath);
    p.createWorkers();
 
    SocketTCP sock;
@@ -65,5 +70,17 @@ void startMaster()
       p.addTask(client.sockfd);
 
    }
+   // std::random_device rd;
+   // std::mt19937 gen(rd());
+   // std::uniform_int_distribution<> distr(2,200 );
+
+   //  // Generate a random number
+   // for (size_t i = 0; i < 1000; i++)
+   // {
+   //    int num = distr(gen);
+   //    std::cout<<"adding task: "<<num<<std::endl;
+   //    p.addTask(num);
+   //    Sleep(num);
+   // }
    
 }

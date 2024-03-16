@@ -8,7 +8,7 @@
 
 #include <string>
 #include <sstream>
-#include "Exceptions.h"
+#include "Exceptions/Exceptions.h"
 #include <iostream>
 #ifdef _WIN32
 /* Windows-specific headers */
@@ -43,6 +43,8 @@ namespace ZServer
 				FROM_PROTOCOL_INFO,
 				&wsaProtocolInfo,
 				0, 0);
+			sockfd = duplicatedSocket;
+
 			if (duplicatedSocket == INVALID_SOCKET)
 			{
 				int errorCode = WSAGetLastError();
@@ -50,10 +52,6 @@ namespace ZServer
 
 				ss << "WSASocketW failed with error: " << errorCode << std::endl;
 				throw SocketError(ss.str());
-			}
-			else
-			{
-				sockfd = duplicatedSocket;
 			}
 		}
 
@@ -128,6 +126,10 @@ namespace ZServer
 
 		bool isValid()
 		{
+			if (sockfd == INVALID_SOCKET)
+			{
+				return false;
+			}
 			return true;
 		}
 

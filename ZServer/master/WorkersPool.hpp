@@ -1,9 +1,9 @@
 #pragma once
 
 #include <thread>
-#include "WorkersBase.hpp"
+#include "../Objects.hpp"
+#include "../WorkersBase.hpp"
 #include <osResources/SharedObject.hpp>
-#include "Objects.hpp"
 #include <osResources/Socket.h>
 using namespace ZServer;
 
@@ -22,7 +22,10 @@ public:
 		std::string executable,
 		int id,
 		std::string sharedMemoryName,
-		SharedObject<sharedQueueType, SomeStruct> *so) : WorkerBase(id)
+		SharedObject<sharedQueueType, SomeStruct> *so,
+		std::string targetDLL
+		) : WorkerBase(id)
+
 	{
 		pipe.create(getPipeName(id));
 		pipeThread = std::thread(&WorkerManager::PipeHandler, this);
@@ -31,15 +34,17 @@ public:
 		std::stringstream ss;
 		ss << executable
 		   << " "
-		   << "slave"
-		   << " "
 		   << "--id"
 		   << " "
 		   << id
 		   << " "
 		   << "-m"
 		   << " "
-		   << sharedMemoryName;
+		   << sharedMemoryName
+		   << " "
+		   << "-d"
+		   << " "
+		   << targetDLL;
 		p = Process(ss.str());
 	}
 
@@ -60,9 +65,9 @@ public:
 
 			if (pipe.read(buf, sizeof(buf)) > 0)
 			{
-				MasterSlaveMessage msg;
-				memcpy(&msg, buf, sizeof(msg));
-				SocketTCP socket(msg.socketID);
+				sharedQueueType msg;
+				memcpy(&msg, buf, sizeof(sharedQueueType));
+				SocketTCP socket(msg);
 				WSAPROTOCOL_INFOW wsaProtocolInfo = socket.transfer(this->p.pi.dwProcessId);
 				memcpy(buf, &wsaProtocolInfo, sizeof(wsaProtocolInfo));
 				pipe.write(buf, BUFFERSIZE);
@@ -82,14 +87,17 @@ class WorkersPool
 	int numberOfSlaves;
 	std::string sharedMemoryName;
 	std::string targetExecutable;
+	std::string targetDLL;
+
 	WorkerManager *workers = nullptr;
 
 public:
 	SharedObject<sharedQueueType, SomeStruct> *so;
 
-	WorkersPool(std::string file_name, int &slaves, std::string &memoryName) : numberOfSlaves(slaves),
+	WorkersPool(std::string file_name, int &slaves, std::string &memoryName,std::string &dllPath) : numberOfSlaves(slaves),
 																			   sharedMemoryName(memoryName),
-																			   targetExecutable(file_name)
+																			   targetExecutable(file_name),
+																			   targetDLL(dllPath)
 	{
 		so = new SharedObject<sharedQueueType, SomeStruct>(shared_mem_size, sharedMemoryName.c_str(), true);
 		so->setData(SomeStruct());
@@ -115,7 +123,7 @@ public:
 		for (int id = 0; id < numberOfSlaves; id++)
 		{
 			// so->push(id * 10);
-			new (&workers[id]) WorkerManager(targetExecutable, id, sharedMemoryName, so);
+			new (&workers[id]) WorkerManager(targetExecutable, id, sharedMemoryName, so,targetDLL);
 		}
 	}
 	void addTask(sharedQueueType t)

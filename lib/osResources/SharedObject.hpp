@@ -214,23 +214,32 @@ public:
 	 */
 	SharedObject(int maxSize, const char *name, bool create = false) : creator(create)
 	{
+		std::string mutex_name = (std::string(name) + "_mutex");
+
 		if (create)
-			SharedQueue<T, ExtraData>::create(maxSize, name, &queue, &hMapFile);
-
-		else
-			SharedQueue<T, ExtraData>::connect(maxSize, name, &queue, &hMapFile);
-		
-
-		SECURITY_ATTRIBUTES sa;
-		sa.nLength = sizeof(sa);
-		sa.lpSecurityDescriptor = NULL; // Uses the default security descriptor if NULL
-		sa.bInheritHandle = TRUE;		// The handle is inheritable
-		const char *mutex_name = (std::string(name) + "_mutex").c_str();
-		if ((hMutex = CreateMutexA(&sa, FALSE, mutex_name)) == NULL)
 		{
-			// raise an exception!
-			std::cerr << "error creating mutex\n";
+
+			SharedQueue<T, ExtraData>::create(maxSize, name, &queue, &hMapFile);
+			std::cout << "creating mutex " << mutex_name << std::endl;
+			if ((hMutex = CreateMutexA(NULL, FALSE, mutex_name.c_str())) == NULL)
+			{
+				// raise an exception!
+				std::cerr << "error creating mutex\n";
+			}
 		}
+		else
+		{
+			SharedQueue<T, ExtraData>::connect(maxSize, name, &queue, &hMapFile);
+			hMutex = OpenMutexA(
+				MUTEX_ALL_ACCESS,	 // request full access
+				FALSE,				 // handle not inheritable
+				mutex_name.c_str()); // object name
+			if (hMutex == NULL)
+			{
+				std::cerr << "error opening mutex " << mutex_name << " " << GetLastError() << "\n";
+			}
+		}
+
 	}
 
 	SharedObject(int maxSize, const char *name, bool create, ExtraData data)
