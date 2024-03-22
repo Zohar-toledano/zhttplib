@@ -2,9 +2,8 @@
 
 #include <list>
 
-#include "http/HTTPReqRes.h"
 #include "Routemap.h"
-
+#include "Utils.h"
 
 namespace ZServer {
 	struct HTTPServerProps
@@ -14,11 +13,11 @@ namespace ZServer {
 			After
 		};
 		RouteMap routeMap{};
-		RouteHandler logger;
+		RouteHandler logger = DefaultLogger;
 		std::list<RouteHandler> middlewareBefore {};
 		std::list<RouteHandler> middlewareAfter {};
-		RouteHandler HandleNotfound;
-		RouteHandler HandleServerError;
+		RouteHandler HandleNotfound = DefaultHandleNotfound;
+		RouteHandler HandleServerError = DefaultHandleServerError;
 
 	};
 }

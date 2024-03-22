@@ -1,10 +1,10 @@
 #pragma once
 
 #include <thread>
+
 #include "../Objects.hpp"
 #include "../WorkersBase.hpp"
-#include <osResources/SharedObject.hpp>
-#include <osResources/Socket.h>
+
 using namespace ZServer;
 
 class WorkerManager : public WorkerBase

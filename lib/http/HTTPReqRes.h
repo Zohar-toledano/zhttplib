@@ -1,13 +1,13 @@
 #pragma once
 #include <functional>
 #include <unordered_map>
-#include <string>
-#include <iostream>
-#include <sstream>
+
+#include <base.hpp>
+
 #include <algorithm>
 
 #include <Exceptions/Exceptions.h>
-#include <osResources\Socket.h>
+#include <osResources/Socket.h>
 
 #define DEFAULT_PROTOCOL "HTTP/1.1"
 #define DEFAULT_STATUS 200

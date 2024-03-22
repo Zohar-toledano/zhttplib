@@ -6,7 +6,7 @@ project(
     LANGUAGES CXX    
     )
 set (CMAKE_CXX_STANDARD 23)
-include_directories(json)
+include_directories(external)
 
 
 # Add the server library as a subdirectory
@@ -23,14 +23,6 @@ add_executable(
     )
 target_link_libraries(
     main
-    application1
+    ZSserverMainProcess
 )
 
-add_library(
-    user_code SHARED
-    userMain.cpp
-    )
-target_link_libraries(
-        user_code
-        application1
-    )

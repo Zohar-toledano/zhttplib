@@ -1,18 +1,20 @@
-#include "master.h"
-#include <server/Server.h>
-using namespace ZServer;
-
 #include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <cassert>
 #include <map>
-#include <filesystem>
-#include <cmrc/cmrc.hpp>
-#include "WorkersPool.hpp"
 #include <random>
+#include <filesystem>
 
-CMRC_DECLARE(app1);
+
+// #include <cmrc/cmrc.hpp>
+#include "master.h"
+#include "osResources/SharedObject.hpp"
+#include "WorkersPool.hpp"
+using namespace ZServer;
+
+// CMRC_DECLARE(app1);
+
 #define EMBEDDED_EXE_FILE "embeded.exe"
 
 /// Credits: https://stackoverflow.com/a/13059195
@@ -37,23 +39,23 @@ struct memstream : virtual membuf, std::istream
        : membuf(base, size), std::istream(static_cast<std::streambuf *>(this)) {}
 };
 
-std::string extractExe()
-{
-   auto fs = cmrc::app1::get_filesystem();
-   auto fd = fs.open(EMBEDDED_EXE_FILE);
-   auto filePath = (std::filesystem::temp_directory_path() / EMBEDDED_EXE_FILE).string();
-   auto is = memstream(const_cast<char *>(fd.begin()), const_cast<char *>(fd.end()));
-   auto ofs = std::ofstream(filePath, std::ios::binary);
-   ofs << is.rdbuf();
-   ofs.flush();
-   ofs.close();
-   return filePath;
-}
+// std::string extractExe()
+// {
+//    auto fs = cmrc::app1::get_filesystem();
+//    auto fd = fs.open(EMBEDDED_EXE_FILE);
+//    auto filePath = (std::filesystem::temp_directory_path() / EMBEDDED_EXE_FILE).string();
+//    auto is = memstream(const_cast<char *>(fd.begin()), const_cast<char *>(fd.end()));
+//    auto ofs = std::ofstream(filePath, std::ios::binary);
+//    ofs << is.rdbuf();
+//    ofs.flush();
+//    ofs.close();
+//    return filePath;
+// }
 void startMaster()
 {
    // auto filePath = extractExe();
    std::string filePath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\ZServer\\Debug\\embeded.exe";
-   std::string dllPath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\Debug\\user_code.dll";
+   std::string dllPath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\ZServer\\Debug\\user_code.dll";
 
 
    int slaves = 2;

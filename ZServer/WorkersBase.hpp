@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
-#include <sstream>
+#include <base.hpp>
 
 #include "osResources/Pipe.hpp"
 #include "osResources/Process.hpp"
+#include <osResources/Socket.h>
 
 struct WorkerBase
 {

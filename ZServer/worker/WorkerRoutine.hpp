@@ -1,10 +1,12 @@
 #pragma once
 
-#include "../WorkersBase.hpp"
-#include <osResources/SharedObject.hpp>
-#include <osResources/Socket.h>
+// #include <osResources/SharedObject.hpp>
+
+#include <server/HTTPServerProps.h>
 #include "../Objects.hpp"
-#include <fstream>
+#include "../WorkersBase.hpp"
+// #include <fstream>
+#define PROC_NAME "GetProps"
 
 using namespace ZServer;
 
@@ -12,21 +14,43 @@ class WorkerRoutine : public WorkerBase
 {
 public:
 	SharedObject<sharedQueueType, SomeStruct> *so;
-	WorkerRoutine(int id, std::string sharedMemoryName) : WorkerBase(id)
+	HMODULE hModule;
+	HTTPServerProps *props;
+
+	WorkerRoutine(int id, std::string sharedMemoryName, std::string dllPath) : WorkerBase(id)
 	{
 		so = new SharedObject<sharedQueueType, SomeStruct>(shared_mem_size, sharedMemoryName.c_str(), false);
 		pipe.connect(WorkerBase::getPipeName(id));
 		ZServer::SocketTCP::init();
+
+		typedef HTTPServerProps *(__stdcall * GetPropsFunction)(void);
+
+		hModule = LoadLibraryA(dllPath.c_str());
+		if (hModule == NULL)
+		{
+			std::cerr << "Failed to load DLL. Error code: " << GetLastError() << std::endl;
+		}
+
+		GetPropsFunction GetProps = (GetPropsFunction)GetProcAddress(hModule, PROC_NAME);
+
+		if (GetProps == NULL)
+		{
+			std::cerr << "Failed to get address of GetProps function. Error code: " << GetLastError() << std::endl;
+		}
+
+		props = GetProps(); //gets server props
 	}
 	~WorkerRoutine()
 	{
 		delete so;
+		delete props;
+		FreeLibrary(hModule);
 	}
 
 	SocketTCP getSocket(sharedQueueType *socketID)
 	{
 		// requests ownership over socket from master process!
-		std::cout << "slave: " << id << " is getting socket " << *socketID << std::endl;
+		// std::cout << "slave: " << id << " is getting socket " << *socketID << std::endl;
 		char buf[PIPE_BUFSIZE];
 		WSAPROTOCOL_INFOW wsaProtocolInfo;
 
@@ -62,9 +86,9 @@ public:
 			Sleep(50);
 		}
 	}
+	
 	void handleSocket(SocketTCP client_socket)
 	{
-		std::cout << "slave: " << id << " is handling socket " << client_socket.sockfd << std::endl;
 		if (!client_socket.isValid())
 		{
 			std::cerr << "accept failed: " << WSAGetLastError() << std::endl;
@@ -73,19 +97,43 @@ public:
 		}
 		HTTPResponse resp{"", {}, &client_socket};
 		HTTPRequest req;
+		bool exception_caught = true;
+
 		try
 		{
 			req = HTTPRequest::requestFromSocket(client_socket);
+			exception_caught = false; // This needs to be the last statement in the try block
+
 		}
 		catch (ZBasicException &e)
 		{
 			resp.setStatus(400);
 			resp.body = e.what();
-			resp.send();
-			return;
 		}
-		resp.setStatus(200);
-		resp.body = "welcome to ZServer!!!\n";
+		if (!exception_caught)
+		{
+			RoteMatch match = props->routeMap.getRouteHandler(req.path);
+			req.pathParams = match.routeParams; // resp.setStatus(200);
+			if (match.found)
+			{
+				try
+				{
+					match.handler(&req, &resp);
+				}
+				catch (...)
+				{
+					props->HandleServerError(&req, &resp);
+				}
+			}
+			else
+			{
+				props->HandleNotfound(&req, &resp);
+			}
+
+		}
+		props->logger(&req, &resp);
 		resp.send();
+		client_socket.close();
+
 	}
 };

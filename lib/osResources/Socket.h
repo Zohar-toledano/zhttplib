@@ -2,18 +2,17 @@
 
 #define BUFFERSIZE 1024
 
-#include <winsock2.h>
-// #include <WS2tcpip.h>
-#include <windows.h>
-
-#include <string>
-#include <sstream>
-#include "Exceptions/Exceptions.h"
-#include <iostream>
 #ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+// #include <WS2tcpip.h>
+
+#include <base.hpp>
+
+#include "Exceptions/Exceptions.h"
 /* Windows-specific headers */
 #pragma comment(lib, "ws2_32.lib")
-// #else
+#else
 // /* POSIX-specific headers */
 // #include <sys/socket.h>
 // #include <netinet/in.h>
