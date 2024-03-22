@@ -53,7 +53,7 @@ void startMaster()
 {
    // auto filePath = extractExe();
    std::string filePath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\ZServer\\Debug\\embeded.exe";
-   std::string dllPath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\Debug\\user_code.dll";
+   std::string dllPath = "C:\\Users\\Zohar\\Downloads\\Zserver\\build\\ZServer\\Debug\\user_code.dll";
 
 
    int slaves = 2;

@@ -36,3 +36,14 @@ app1::rc
 )
 
 
+add_library(
+    user_code SHARED
+    userMain.cpp
+    )
+# target_include_directories(user_code PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(
+    user_code
+    PRIVATE
+  ZServer_lib
+)

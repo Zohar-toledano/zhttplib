@@ -25,12 +25,3 @@ target_link_libraries(
     main
     application1
 )
-
-add_library(
-    user_code SHARED
-    userMain.cpp
-    )
-target_link_libraries(
-        user_code
-        application1
-    )
