@@ -1,8 +1,4 @@
-Here’s an enhanced version of your `README.md` with improved structure, clarity, grammar, and formatting:
 
----
-
-````markdown
 # ZServer
 
 **ZServer** is a lightweight, proof-of-concept HTTP/1.1 server written in C++ using the Windows API. It demonstrates core web server concepts including:
