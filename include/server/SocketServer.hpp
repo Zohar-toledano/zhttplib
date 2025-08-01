@@ -5,7 +5,7 @@
 #include <osResources/Process.hpp>
 #include <osResources/Pipe.hpp>
 #include <osResources/SharedMemory.hpp>
-#include <http/http.h>
+#include <http/HTTP.hpp>
 #include <server/ThreadPool.hpp>
 #include <server/Routemap.hpp>
 

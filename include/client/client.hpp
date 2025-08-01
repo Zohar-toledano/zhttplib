@@ -2,7 +2,7 @@
 #include <regex>
 
 #include <osResources/TCPSocket.hpp>
-#include <http/http.h>
+#include <http/HTTP.hpp>
 
 int getDefaultPort(HTTP_VERSION version);
 struct URL

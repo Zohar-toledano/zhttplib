@@ -1,4 +1,4 @@
-#include <http/HTTPResponse.h>
+#include <http/HTTPResponse.hpp>
 
 HTTPResponse::HTTPResponse(
 	std::string body,

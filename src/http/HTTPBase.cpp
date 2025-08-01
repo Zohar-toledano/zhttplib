@@ -1,4 +1,4 @@
-#include <http/HTTPBase.h>
+#include <http/HTTPBase.hpp>
 
 const StringMap HTTPBase::contentTypeByFileExt = {
 	{"aac", "audio/aac"},

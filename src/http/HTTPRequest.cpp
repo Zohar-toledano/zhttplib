@@ -1,4 +1,4 @@
-#include <http/HTTPRequest.h>
+#include <http/HTTPRequest.hpp>
 HTTPRequest::HTTPRequest() : HTTPBase()
 {
 }

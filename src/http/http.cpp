@@ -1,4 +1,4 @@
-#include <http/http.h>
+#include <http/HTTP.hpp>
 
 const std::unordered_map<int, std::string> HTTPResponse::statusToStringMap{
 	{100, "Continue"},

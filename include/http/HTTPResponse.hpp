@@ -1,5 +1,5 @@
 #pragma once
-#include <http/HTTPBase.h>
+#include <http/HTTPBase.hpp>
 class HTTPResponse : public HTTPBase
 {
 	int status;
