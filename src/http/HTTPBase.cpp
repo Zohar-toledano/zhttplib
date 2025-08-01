@@ -1,74 +1,6 @@
-#include "HTTPReqRes.h"
-const std::unordered_map<int, std::string> HTTPResponse::statusToStringMap{
-	{100, "Continue"},
-	{101, "Switching protocols"},
-	{102, "Processing"},
-	{103, "Early Hints"},
-	// 2xx Succesful
-	{200, "OK"},
-	{201, "Created"},
-	{202, "Accepted"},
-	{203, "Non-Authoritative Information"},
-	{204, "No Content"},
-	{205, "Reset Content"},
-	{206, "Partial Content"},
-	{207, "Multi-Status"},
-	{208, "Already Reported"},
-	{226, "IM Used"},
-	// 3xx Redirection
-	{300, "Multiple Choices"},
-	{301, "Moved Permanently"},
-	{302, "Found (Previously \" Moved Temporarily \")"},
-	{303, "See Other"},
-	{304, "Not Modified"},
-	{305, "Use Proxy"},
-	{306, "Switch Proxy"},
-	{307, "Temporary Redirect"},
-	{308, "Permanent Redirect"},
-	// 4xx Client Error
-	{400, "Bad Request"},
-	{401, "Unauthorized"},
-	{402, "Payment Required"},
-	{403, "Forbidden"},
-	{404, "Not Found"},
-	{405, "Method Not Allowed"},
-	{406, "Not Acceptable"},
-	{407, "Proxy Authentication Required"},
-	{408, "Request Timeout"},
-	{409, "Conflict"},
-	{410, "Gone"},
-	{411, "Length Required"},
-	{412, "Precondition Failed"},
-	{413, "Payload Too Large"},
-	{414, "URI Too Long"},
-	{415, "Unsupported Media Type"},
-	{416, "Range Not Satisfiable"},
-	{417, "Expectation Failed"},
-	{418, "I'm a Teapot"},
-	{421, "Misdirected Request"},
-	{422, "Unprocessable Entity"},
-	{423, "Locked"},
-	{424, "Failed Dependency"},
-	{425, "Too Early"},
-	{426, "Upgrade Required"},
-	{428, "Precondition Required"},
-	{429, "Too Many Requests"},
-	{431, "Request Header Fields Too Large"},
-	{451, "Unavailable For Legal Reasons"},
-	// 5xx Server Error
-	{500, "Internal Server Error"},
-	{501, "Not Implemented"},
-	{502, "Bad Gateway"},
-	{503, "Service Unavailable"},
-	{504, "Gateway Timeout"},
-	{505, "HTTP Version Not Supported"},
-	{506, "Variant Also Negotiates"},
-	{507, "Insufficient Storage"},
-	{508, "Loop Detected"},
-	{510, "Not Extended"},
-	{511, "Network Authentication Required"}};
+#include <http/HTTPBase.h>
 
-const StringMap HTTPData::contentTypeByFileExt = {
+const StringMap HTTPBase::contentTypeByFileExt = {
 	{"aac", "audio/aac"},
 	{"abw", "application/x-abiword"},
 	{"arc", "application/x-freearc"},
@@ -202,3 +134,65 @@ std::string HTTPVersionToStr(HTTP_VERSION version)
 		return "HTTP/1.0";
 	}
 }
+
+HTTPBase::HTTPBase(HTTP_VERSION protocol) : protocol(protocol)
+{
+}
+
+HTTPHeaders HTTPBase::parseHeaders(std::string *text, bool *ended)
+{
+	HTTPHeaders headers = HTTPHeaders();
+	size_t startLine = 0;
+	size_t endLine = 0;
+	size_t headersEnd = text->find("\n\n");
+	if (headersEnd == std::string::npos)
+	{
+		headersEnd = text->length();
+	}
+	size_t total = 0;
+	while (total < headersEnd)
+	{
+		endLine = text->find("\r\n");
+		total += endLine + 2;
+		if (endLine == std::string::npos)
+		{
+			*ended = false;
+			return headers;
+		}
+		size_t nekodotaim = text->find(":");
+		if (nekodotaim == std::string::npos)
+		{
+			continue;
+		}
+		if (total != headersEnd)
+		{
+			std::string key = text->substr(0, nekodotaim);
+			std::string value = text->substr(nekodotaim + 1, endLine - nekodotaim - 1);
+			if (value.starts_with(" "))
+			{
+				value = value.substr(1);
+			}
+
+			headers[key] = value;
+			// std::cout << "key: " << key << " value: " << value << "\n";
+			*text = text->substr(endLine + 2);
+		}
+		else
+		{
+			*ended = false;
+			return headers;
+		}
+	}
+	*ended = true;
+	return headers;
+}
+std::string HTTPBase::headersToString(HTTPHeaders headers)
+{
+	std::stringstream ss;
+	for (auto [key, value] : headers)
+	{
+		ss << key << ": " << value << "\n";
+	}
+	return ss.str();
+}
+void HTTPBase::print() { std::cout << "HTTPBase object"; }

@@ -8,4 +8,5 @@ project(SERVER VERSION 0.1 LANGUAGES CXX)
 file (GLOB_RECURSE CPPFILES CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(${PROJECT_NAME} ${CPPFILES})
+target_include_directories(${PROJECT_NAME} PUBLIC include)
 target_link_directories(${PROJECT_NAME} PUBLIC src)

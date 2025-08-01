@@ -1,4 +1,4 @@
-#include "TCPSocket.hpp"
+#include <osResources/TCPSocket.hpp>
 
 #include <stdexcept>
 #include <utility>
